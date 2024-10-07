@@ -22,6 +22,7 @@ Inspired by the climate control challenges of a split-level home, the **Resident
 
 ## Problem and Solution
 **Problem:** In split-level and long ranch-style homes, effectively managing temperature across different floors and spaces presents significant challenges. In split-level homes, the basement often remains too cold in summer while the top floor bedrooms can become overheated, leading to discomfort and inefficient HVAC operation. Similarly, in ranch homes, southern spaces (in the northern hemisphere) can become excessively hot while more centralized locations housing the thermostat, such as a living room or foyer, may indicate a satisfied temperature threshold.
+
 **Solution:** The **Residential Autonomous Air Ventilation Control (RAAVC)** system employs custom motorized 3D-printed vent covers and wall-mounted sensors to dynamically regulate airflow based on localized temperature, humidity, and occupancy data. By adjusting vent positions in real-time, the system optimally directs climate-controlled air to where it’s needed most, enhancing overall comfort and energy efficiency while reducing HVAC runtime and costs.
 
 
@@ -34,6 +35,22 @@ Throughout the development of the **Residential Autonomous Air Ventilation Contr
 - **Machine Learning for System Optimization:** We are continuing to explore self-improving machine learning models to further optimize airflow management and enhance energy efficiency in HVAC operations.
 
 ## Features
+
+The **Residential Autonomous Air Ventilation Control (RAAVC)** system includes several innovative features designed to enhance home climate control:
+
+- **Custom Motorized Vent Covers:** 3D-printed vent covers that can open and close automatically based on real-time data.
+
+- **Wall-Mounted Sensors:** Each room is equipped with sensors that measure temperature, humidity, and occupancy to provide localized environmental data.
+
+- **Real-Time Airflow Regulation:** The system adjusts vent positions dynamically to optimize airflow throughout the home, ensuring comfort in all spaces.
+
+- **Integration with Google Nest:** Seamless compatibility with Google Nest thermostats for efficient HVAC control.
+
+- **Universal Performance Data Visualization Dashboard:** A user-friendly interface for monitoring room-by-room temperatures, tracking system runtime, and calculating potential energy savings.
+
+- **Machine Learning Optimization:** The system continuously learns from data to improve its performance, ensuring optimal airflow management over time.
+
+- **Bluetooth and Wi-Fi Connectivity:** Reliable communication between devices for coordinated system operation and data transfer.
 
 ## Installation
 
