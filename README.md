@@ -3,13 +3,13 @@
 ## Project Overview
 The **Residential Autonomous Air Ventilation Control (RAAVC)** project optimizes airflow in residential spaces using custom motorized 3D-printed air vent covers and wall-mounted sensors (temperature, humidity, and occupancy). Paired with Google Nest, the system dynamically adjusts air distribution based on local conditions, aiming to improve efficiency by reducing HVAC runtime, saving energy, and lowering costs. It also utilizes machine learning to enhance control over time, directing air where it’s needed most.
 
-<div style="display: flex; width: 800px; height: 400px;">
-  <div style="width: 200px; height: 400px; display: flex; flex-direction: column;">
-    <img src="/images/airvent_top.png" alt="CAD Design Top" style="width: 100%; height: 50%;" />
-    <img src="/images/cad_design.png" alt="CAD Design Side" style="width: 100%; height: 50%;" />
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; height: 100vh;">
+  <div style="display: flex; flex-direction: column; justify-content: center;">
+    <img src="/images/airvent_top.png" alt="CAD Design Top" style="width: 100%; object-fit: cover;" />
+    <img src="/images/cad_design.png" alt="CAD Design Side" style="width: 100%; object-fit: cover;" />
   </div>
-  <div style="width: 400px; height: 400px;">
-    <img src="/images/airvent.gif" alt="Air Vent Operating" style="width: 100%; height: 100%;" />
+  <div>
+    <img src="/images/airvent.gif" alt="Air Vent Operating" style="width: 100%; height: 100%; object-fit: cover;" />
   </div>
 </div>
 
