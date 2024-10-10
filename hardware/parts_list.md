@@ -10,8 +10,9 @@
 6. 1 x Pi mount
 7. 4 x small gear
 8. 2 x large gear
-9. 6 x spacer
-10. 1 x top
+9. 1 x Servo gear
+10. 6 x spacer
+11. 1 x top
 
 ### Electrical Components
 1. 1 x Raspberry Pi Pico
