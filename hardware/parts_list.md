@@ -3,14 +3,14 @@
 ## Vent Cover 
 ### 3D Printed Components
 1. 2 x large side
-2. 2 x small sides
-3. 2 x small louvers
+2. 2 x small side
+3. 2 x small louver
 4. 1 x large louver
 5. 1 x Servo mount
 6. 1 x Pi mount
-7. 4 x small gears
-8. 2 x large gears
-9. 6 x spacers
+7. 4 x small gear
+8. 2 x large gear
+9. 6 x spacer
 10. 1 x top
 
 ### Electrical Components
