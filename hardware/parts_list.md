@@ -1,5 +1,8 @@
 # Hardware Assembly
 
+[Vent Cover](#vent-cover)
+[Sensor Housing](#sensor-housing)
+
 ## Vent Cover 
 ### 3D Printed Components
 1. 2 x large side
