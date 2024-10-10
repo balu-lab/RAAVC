@@ -1,7 +1,6 @@
 # Hardware Assembly
-
-[Vent Cover](#vent-cover)
-[Sensor Housing](#sensor-housing)
+1. [Vent Cover](#vent-cover)
+2. [Sensor Housing](#sensor-housing)
 
 ## Vent Cover 
 ### 3D Printed Components
