@@ -1,0 +1,52 @@
+#client script
+import bluetooth
+import os
+
+def receive_file_over_bluetooth(sock, file_path):
+    try:
+        # Receive data in chunks and write to a file
+        with open(file_path, 'wb') as file:
+            while True:
+                data = sock.recv(1024)
+                if not data:
+                    break
+                file.write(data)
+        print("File received successfully.")
+    except Exception as e:
+        print(f"Failed to receive file: {e}")
+
+def find_master_pi():
+    while True:
+        try:
+            # Scan for nearby Bluetooth devices
+            nearby_devices = bluetooth.discover_devices(duration=8, lookup_names=True)
+            for addr, name in nearby_devices:
+                if name == "MasterPi":
+                    print(f"Found MasterPi at {addr}. Attempting to connect...")
+                    return addr
+            print("MasterPi not found, retrying...")
+        except Exception as e:
+            print(f"Error in Bluetooth discovery: {e}")
+
+def connect_to_master_pi(master_addr):
+    try:
+        # Create a Bluetooth socket and connect to MasterPi
+        sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+        sock.connect((master_addr, 1))
+
+        # Receive the Wi-Fi credentials file
+        receive_file_over_bluetooth(sock, 'wifi_creds.json')
+
+        # Close the connection
+        sock.close()
+    except Exception as e:
+        print(f"Failed to connect to MasterPi: {e}")
+
+if __name__ == "__main__":
+    while True:
+        # Try to find MasterPi's Bluetooth address
+        master_addr = find_master_pi()
+        if master_addr:
+            # Connect to MasterPi and receive the file
+            connect_to_master_pi(master_addr)
+            break

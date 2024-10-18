@@ -1,0 +1,55 @@
+#masterpi script
+import bluetooth
+import os
+
+def send_file_over_bluetooth(client_sock, file_path):
+    try:
+        # Open the Wi-Fi credentials file
+        with open(file_path, 'rb') as file:
+            data = file.read()
+
+        # Send the file contents over Bluetooth
+        client_sock.sendall(data)
+        print("File sent successfully.")
+    except Exception as e:
+        print(f"Failed to send file: {e}")
+
+def setup_bluetooth_server():
+    try:
+        # Create a Bluetooth socket for communication
+        server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+        server_sock.bind(("", bluetooth.PORT_ANY))
+        server_sock.listen(1)
+
+        # Get the Bluetooth port
+        port = server_sock.getsockname()[1]
+
+        # Advertise the service with name 'MasterPi'
+        bluetooth.advertise_service(
+            server_sock,
+            "MasterPi",
+            service_classes=[bluetooth.SERIAL_PORT_CLASS],
+            profiles=[bluetooth.SERIAL_PORT_PROFILE]
+        )
+        print(f"Waiting for connection on RFCOMM channel {port}...")
+
+        # Accept a connection from a client Pi
+        client_sock, client_info = server_sock.accept()
+        print(f"Accepted connection from {client_info}")
+
+        # Send the Wi-Fi credentials file
+        send_file_over_bluetooth(client_sock, 'wifi_creds.json')
+
+        # Close the sockets after sending the file
+        client_sock.close()
+        server_sock.close()
+
+    except Exception as e:
+        print(f"Error in Bluetooth server: {e}")
+
+if __name__ == "__main__":
+    # Ensure the Wi-Fi credentials file exists
+    if os.path.exists('wifi_creds.json'):
+        setup_bluetooth_server()
+    else:
+        print("Wi-Fi credentials file not found.")
