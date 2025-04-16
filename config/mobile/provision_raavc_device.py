@@ -1,48 +1,13 @@
-import bluetooth
 import json
 import time
-from pathlib import Path
 from datetime import datetime
+import paho.mqtt.publish as publish
 
-PI_BT_NAME = "New RAAVC Device"
-CONFIG_PATH = Path("raavc_config.json")
-WIFI_PATH = Path("wifi_creds.json")
+CONFIG_TOPIC = "raavc/config"
+WIFI_TOPIC = "raavc/wifi"
 
 def log(msg):
     print(f"[{datetime.now().isoformat()}] {msg}")
-
-def find_pi_device():
-    log("Scanning for Bluetooth devices...")
-    nearby_devices = bluetooth.discover_devices(duration=8, lookup_names=True)
-
-    for addr, name in nearby_devices:
-        if name == PI_BT_NAME:
-            log(f"Found RAAVC Pi at {addr}")
-            return addr
-    log("RAAVC Pi not found.")
-    return None
-
-def send_json_file(addr, json_data, label):
-    sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-    try:
-        log(f"Connecting to {addr} for {label}...")
-        sock.connect((addr, 1))  # Channel 1
-
-        sock.send((json.dumps(json_data) + "\n").encode("utf-8"))
-        log(f"{label} sent, waiting for response...")
-
-        ack = sock.recv(1024).decode("utf-8").strip()
-        if ack == "SUCCESS":
-            log(f"{label} provisioning successful.")
-            return True
-        else:
-            log(f"{label} provisioning failed: {ack}")
-            return False
-    except Exception as e:
-        log(f"Error during {label} send: {e}")
-        return False
-    finally:
-        sock.close()
 
 def prompt_raavc_config():
     device_id = input("Enter device ID (e.g. VENT_1038): ").strip()
@@ -74,22 +39,28 @@ def prompt_wifi_creds():
         "password": password
     }
 
+def send_via_mqtt(broker_ip, topic, payload, label):
+    try:
+        publish.single(topic, json.dumps(payload), hostname=broker_ip)
+        log(f"{label} sent successfully to topic '{topic}'")
+        return True
+    except Exception as e:
+        log(f"Error sending {label}: {e}")
+        return False
+
 def main():
-    addr = find_pi_device()
-    if not addr:
-        return
+    broker_ip = input("Enter the Pi's MQTT broker IP address: ").strip()
 
-    log("Bluetooth connection ready. Prompting for provisioning data...")
-
+    log("Prompting for provisioning data...")
     raavc_config = prompt_raavc_config()
     wifi_creds = prompt_wifi_creds()
 
     time.sleep(1)
-    if not send_json_file(addr, raavc_config, "RAAVC config"):
+    if not send_via_mqtt(broker_ip, CONFIG_TOPIC, raavc_config, "RAAVC config"):
         return
 
-    time.sleep(2)
-    send_json_file(addr, wifi_creds, "WiFi credentials")
+    time.sleep(1)
+    send_via_mqtt(broker_ip, WIFI_TOPIC, wifi_creds, "WiFi credentials")
 
 if __name__ == "__main__":
     main()
