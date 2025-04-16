@@ -1,0 +1,14 @@
+{
+    "device_id": "vent-001",
+    "role": "vent",
+    "room": "Living Room",
+    "thresholds": {
+      "temperature": {
+        "min": 68,
+        "max": 74
+      },
+      "humidity": {
+        "max_deviation_std": 1.5
+      }
+    }
+  }
