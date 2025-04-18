@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
-CONFIG_DIR = Path("/RAAVC/config")
+CONFIG_DIR = Path("config")
 CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
 INCOMING_DIR = Path.home() / "bluetooth"
