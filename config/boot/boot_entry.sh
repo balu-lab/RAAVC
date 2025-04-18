@@ -21,6 +21,9 @@ if ! command -v git &> /dev/null; then
     sudo apt-get install -y git
 fi
 
+# Allow Git to trust this repo path (fixes "dubious ownership" warning)
+git config --global --add safe.directory "$REPO_PATH"
+
 # Clone or update the repo
 if [ ! -d "$REPO_PATH" ]; then
     echo "[BOOT] RAAVC repo not found. Cloning..."
