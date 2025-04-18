@@ -4,10 +4,10 @@ REPO_PATH="/home/raavc/RAAVC"
 BOOT_SCRIPT="$REPO_PATH/config/boot/boot_entry.py"
 REPO_URL="https://github.com/balu-lab/RAAVC.git"
 
-echo "[BOOT] Waiting for WiFi connection..."
+echo "[BOOT] Checking for WiFi connection..."
 
 # Wait until wlan0 has an IP
-while ! ip a | grep -q "wlan0.*inet "; do
+while [ -z "$(hostname -I)" ]; do
     echo "[BOOT] WiFi not connected. Retrying in 3s..."
     sleep 3
 done
