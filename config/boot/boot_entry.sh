@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export USER="raavc"
+export HOME="/home/raavc"
+
 REPO_PATH="/home/raavc/RAAVC"
 BOOT_SCRIPT="$REPO_PATH/config/boot/boot_entry.py"
 REPO_URL="https://github.com/balu-lab/RAAVC.git"
@@ -8,8 +11,7 @@ echo "[BOOT] Checking for WiFi connection..."
 
 # Wait until wlan0 has an IP
 while [ -z "$(hostname -I)" ]; do
-    echo "[BOOT] WiFi not connected. Retrying in 3s..."
-    sleep 3
+    sleep 1
 done
 
 echo "[BOOT] WiFi connected."
@@ -29,7 +31,7 @@ if [ ! -d "$REPO_PATH" ]; then
     echo "[BOOT] RAAVC repo not found. Cloning..."
     git clone "$REPO_URL" "$REPO_PATH"
 else
-    echo "[BOOT] RAAVC repo exists. Pulling updates..."
+    echo "[BOOT] RAAVC repo found. Pulling updates..."
     cd "$REPO_PATH" || exit 1
     git reset --hard HEAD
     git pull origin main
