@@ -47,7 +47,22 @@ def send_file_via_bluetooth(bt_addr, file_path):
         return False
 
 def main():
-    bt_addr = input("Enter the Pi's Bluetooth MAC address: ").strip()
+    TARGET_NAME = "New RAAVC Device"
+    log(f"Scanning for Bluetooth devices named '{TARGET_NAME}'...")
+    nearby_devices = bluetooth.discover_devices(duration=8, lookup_names=True)
+
+    bt_addr = None
+    for addr, name in nearby_devices:
+        print(name)
+        if name == TARGET_NAME:
+            bt_addr = addr
+            break
+
+    if not bt_addr:
+        log(f"Device named '{TARGET_NAME}' not found.")
+        return
+
+    log(f"Found target device at {bt_addr}")
 
     log("Prompting for provisioning data...")
     raavc_config = prompt_raavc_config()
