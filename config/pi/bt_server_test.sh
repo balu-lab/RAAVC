@@ -1,14 +1,15 @@
 #!/bin/bash
 
 DEVICE_NAME="New RAAVC Device"
+RFCOMM_CHANNEL=26
 RFCOMM_DEVICE="/dev/rfcomm0"
 OUTPUT_FILE="received_data.txt"
 
 echo "[INFO] Releasing any existing RFCOMM bindings..."
 sudo rfcomm release 0 &>/dev/null
 
-# Kill lingering rfcomm listeners from previous runs
-EXISTING_PID=$(pgrep -f "rfcomm listen hci0 1")
+# Kill lingering rfcomm listeners from previous runs on channel 26
+EXISTING_PID=$(pgrep -f "rfcomm listen hci0 $RFCOMM_CHANNEL")
 if [ -n "$EXISTING_PID" ]; then
   echo "[INFO] Killing existing rfcomm listener (PID $EXISTING_PID)..."
   sudo kill "$EXISTING_PID"
@@ -26,9 +27,9 @@ default-agent
 EOF
 
 echo "[INFO] Bluetooth device set to '$DEVICE_NAME'."
-echo "[INFO] Starting RFCOMM listener on channel 1..."
+echo "[INFO] Starting RFCOMM listener on channel $RFCOMM_CHANNEL..."
 
-sudo rfcomm listen hci0 1 &
+sudo rfcomm listen hci0 $RFCOMM_CHANNEL &
 RFCOMM_PID=$!
 
 # Wait for /dev/rfcomm0 to be created
