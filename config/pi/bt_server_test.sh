@@ -4,7 +4,18 @@ DEVICE_NAME="New RAAVC Device"
 RFCOMM_DEVICE="/dev/rfcomm0"
 OUTPUT_FILE="received_data.txt"
 
+echo "[INFO] Releasing any existing RFCOMM bindings..."
+sudo rfcomm release 0 &>/dev/null
+
+# Kill lingering rfcomm listeners from previous runs
+EXISTING_PID=$(pgrep -f "rfcomm listen hci0 1")
+if [ -n "$EXISTING_PID" ]; then
+  echo "[INFO] Killing existing rfcomm listener (PID $EXISTING_PID)..."
+  sudo kill "$EXISTING_PID"
+fi
+
 # Set Bluetooth name and make discoverable/pairable
+echo "[INFO] Configuring Bluetooth device..."
 bluetoothctl << EOF
 power on
 system-alias $DEVICE_NAME
@@ -14,28 +25,26 @@ pairable on
 default-agent
 EOF
 
-echo "[INFO] Bluetooth device configured as '$DEVICE_NAME'."
+echo "[INFO] Bluetooth device set to '$DEVICE_NAME'."
 echo "[INFO] Starting RFCOMM listener on channel 1..."
 
-# Kill any existing rfcomm connections
-sudo rfcomm release 0 2>/dev/null
-
-# Listen for incoming connection (binds /dev/rfcomm0)
 sudo rfcomm listen hci0 1 &
 RFCOMM_PID=$!
 
 # Wait for /dev/rfcomm0 to be created
+echo "[INFO] Waiting for connection on /dev/rfcomm0..."
 while [ ! -e "$RFCOMM_DEVICE" ]; do
     sleep 1
 done
 
-echo "[INFO] Connection established. Waiting for data..."
+echo "[INFO] Connection established. Receiving data..."
 
 # Read data from /dev/rfcomm0 and write to file
 cat "$RFCOMM_DEVICE" > "$OUTPUT_FILE"
 
 # Cleanup
-sudo rfcomm release 0
-kill "$RFCOMM_PID"
+echo "[INFO] Cleaning up..."
+sudo rfcomm release 0 &>/dev/null
+kill "$RFCOMM_PID" &>/dev/null
 
 echo "[INFO] Data saved to $OUTPUT_FILE"
