@@ -1,10 +1,8 @@
 import json
 import time
 from datetime import datetime
-import paho.mqtt.publish as publish
-
-CONFIG_TOPIC = "raavc/config"
-WIFI_TOPIC = "raavc/wifi"
+import bluetooth
+import os
 
 def log(msg):
     print(f"[{datetime.now().isoformat()}] {msg}")
@@ -39,28 +37,33 @@ def prompt_wifi_creds():
         "password": password
     }
 
-def send_via_mqtt(broker_ip, topic, payload, label):
+def send_file_via_bluetooth(bt_addr, file_path):
     try:
-        publish.single(topic, json.dumps(payload), hostname=broker_ip)
-        log(f"{label} sent successfully to topic '{topic}'")
+        os.system(f'obexftp --nopath --noconn --uuid none --bluetooth {bt_addr} --channel 9 --put "{file_path}"')
+        log(f"File '{file_path}' sent successfully via Bluetooth to {bt_addr}")
         return True
     except Exception as e:
-        log(f"Error sending {label}: {e}")
+        log(f"Error sending file via Bluetooth: {e}")
         return False
 
 def main():
-    broker_ip = input("Enter the Pi's MQTT broker IP address: ").strip()
+    bt_addr = input("Enter the Pi's Bluetooth MAC address: ").strip()
 
     log("Prompting for provisioning data...")
     raavc_config = prompt_raavc_config()
     wifi_creds = prompt_wifi_creds()
 
-    time.sleep(1)
-    if not send_via_mqtt(broker_ip, CONFIG_TOPIC, raavc_config, "RAAVC config"):
-        return
+    with open("raavc_config.json", "w") as f:
+        json.dump(raavc_config, f)
+
+    with open("wifi_creds.json", "w") as f:
+        json.dump(wifi_creds, f)
 
     time.sleep(1)
-    send_via_mqtt(broker_ip, WIFI_TOPIC, wifi_creds, "WiFi credentials")
+    send_file_via_bluetooth(bt_addr, "raavc_config.json")
+
+    time.sleep(1)
+    send_file_via_bluetooth(bt_addr, "wifi_creds.json")
 
 if __name__ == "__main__":
     main()
