@@ -1,23 +1,14 @@
 #!/bin/bash
 
 DEVICE_NAME="New RAAVC Device"
-RFCOMM_CHANNEL=26
-RFCOMM_DEVICE="/dev/rfcomm0"
 OUTPUT_FILE="received_data.txt"
 
-echo "[INFO] Releasing any existing RFCOMM bindings..."
-sudo rfcomm release 0 &>/dev/null
+while true; do
+    echo "[INFO] Releasing any existing RFCOMM bindings..."
+    sudo rfcomm release 0 &>/dev/null
 
-# Kill lingering rfcomm listeners from previous runs on this channel
-EXISTING_PID=$(pgrep -f "rfcomm listen hci0 $RFCOMM_CHANNEL")
-if [ -n "$EXISTING_PID" ]; then
-  echo "[INFO] Killing existing rfcomm listener (PID $EXISTING_PID)..."
-  sudo kill "$EXISTING_PID"
-fi
-
-# Set Bluetooth name and make discoverable/pairable with headless pairing
-echo "[INFO] Configuring Bluetooth device for headless auto-pairing..."
-bluetoothctl << EOF
+    echo "[INFO] Configuring Bluetooth device for headless auto-pairing..."
+    bluetoothctl << EOF
 power on
 agent NoInputNoOutput
 default-agent
@@ -26,26 +17,37 @@ discoverable on
 system-alias $DEVICE_NAME
 EOF
 
-echo "[INFO] Bluetooth device set to '$DEVICE_NAME'."
-echo "[INFO] Starting RFCOMM listener on channel $RFCOMM_CHANNEL..."
+    # Find an available RFCOMM channel (fallback to 26 if unknown)
+    RFCOMM_CHANNEL=$(shuf -i 10-30 -n 1)
+    echo "[INFO] Using RFCOMM channel $RFCOMM_CHANNEL..."
 
-sudo rfcomm listen hci0 $RFCOMM_CHANNEL &
-RFCOMM_PID=$!
+    echo "[INFO] Starting RFCOMM listener on channel $RFCOMM_CHANNEL..."
+    sudo rfcomm listen hci0 $RFCOMM_CHANNEL &
+    RFCOMM_PID=$!
 
-# Wait for /dev/rfcomm0 to be created
-echo "[INFO] Waiting for connection on /dev/rfcomm0..."
-while [ ! -e "$RFCOMM_DEVICE" ]; do
-    sleep 1
+    # Wait for connection (file created means something connected)
+    echo "[INFO] Waiting for incoming connection (/dev/rfcomm0)..."
+    TIMEOUT=60
+    TIMER=0
+    while [ ! -e "/dev/rfcomm0" ] && [ $TIMER -lt $TIMEOUT ]; do
+        sleep 1
+        ((TIMER++))
+    done
+
+    if [ ! -e "/dev/rfcomm0" ]; then
+        echo "[WARN] No connection established after $TIMEOUT seconds. Retrying..."
+        kill "$RFCOMM_PID" &>/dev/null
+        continue
+    fi
+
+    echo "[INFO] Connection established. Receiving data..."
+    cat /dev/rfcomm0 > "$OUTPUT_FILE"
+
+    echo "[INFO] Data saved to $OUTPUT_FILE"
+    echo "[INFO] Resetting and waiting for new connection..."
+
+    sudo rfcomm release 0 &>/dev/null
+    kill "$RFCOMM_PID" &>/dev/null
+
+    sleep 2
 done
-
-echo "[INFO] Connection established. Receiving data..."
-
-# Read data from /dev/rfcomm0 and write to file
-cat "$RFCOMM_DEVICE" > "$OUTPUT_FILE"
-
-# Cleanup
-echo "[INFO] Cleaning up..."
-sudo rfcomm release 0 &>/dev/null
-kill "$RFCOMM_PID" &>/dev/null
-
-echo "[INFO] Data saved to $OUTPUT_FILE"
