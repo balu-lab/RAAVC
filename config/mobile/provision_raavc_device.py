@@ -2,7 +2,6 @@ import json
 import time
 from datetime import datetime
 import bluetooth
-import os
 
 def log(msg):
     print(f"[{datetime.now().isoformat()}] {msg}")
@@ -37,48 +36,42 @@ def prompt_wifi_creds():
         "password": password
     }
 
-def send_file_via_bluetooth(bt_addr, file_path):
-    try:
-        os.system(f'obexftp --nopath --noconn --uuid none --bluetooth {bt_addr} --channel 9 --put "{file_path}"')
-        log(f"File '{file_path}' sent successfully via Bluetooth to {bt_addr}")
-        return True
-    except Exception as e:
-        log(f"Error sending file via Bluetooth: {e}")
-        return False
+def find_target_device(target_name):
+    log(f"Scanning for Bluetooth devices named '{target_name}'...")
+    nearby_devices = bluetooth.discover_devices(duration=8, lookup_names=True)
+    for addr, name in nearby_devices:
+        print(f"Found: {name} ({addr})")
+        if name == target_name:
+            return addr
+    return None
 
 def main():
     TARGET_NAME = "New RAAVC Device"
-    log(f"Scanning for Bluetooth devices named '{TARGET_NAME}'...")
-    nearby_devices = bluetooth.discover_devices(duration=8, lookup_names=True)
+    target_addr = find_target_device(TARGET_NAME)
 
-    bt_addr = None
-    for addr, name in nearby_devices:
-        print(name)
-        if name == TARGET_NAME:
-            bt_addr = addr
-            break
-
-    if not bt_addr:
-        log(f"Device named '{TARGET_NAME}' not found.")
+    if not target_addr:
+        log("Target device not found.")
         return
 
-    log(f"Found target device at {bt_addr}")
+    log(f"Connecting to {target_addr} via RFCOMM...")
+    sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+    sock.connect((target_addr, 1))
 
     log("Prompting for provisioning data...")
     raavc_config = prompt_raavc_config()
     wifi_creds = prompt_wifi_creds()
 
-    with open("raavc_config.json", "w") as f:
-        json.dump(raavc_config, f)
+    full_package = {
+        "config": raavc_config,
+        "wifi": wifi_creds
+    }
 
-    with open("wifi_creds.json", "w") as f:
-        json.dump(wifi_creds, f)
+    # Send as one JSON payload
+    payload = json.dumps(full_package).encode("utf-8")
+    sock.send(payload)
 
-    time.sleep(1)
-    send_file_via_bluetooth(bt_addr, "raavc_config.json")
-
-    time.sleep(1)
-    send_file_via_bluetooth(bt_addr, "wifi_creds.json")
+    sock.close()
+    log("Provisioning data sent.")
 
 if __name__ == "__main__":
     main()
