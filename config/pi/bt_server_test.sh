@@ -8,22 +8,22 @@ OUTPUT_FILE="received_data.txt"
 echo "[INFO] Releasing any existing RFCOMM bindings..."
 sudo rfcomm release 0 &>/dev/null
 
-# Kill lingering rfcomm listeners from previous runs on channel 26
+# Kill lingering rfcomm listeners from previous runs on this channel
 EXISTING_PID=$(pgrep -f "rfcomm listen hci0 $RFCOMM_CHANNEL")
 if [ -n "$EXISTING_PID" ]; then
   echo "[INFO] Killing existing rfcomm listener (PID $EXISTING_PID)..."
   sudo kill "$EXISTING_PID"
 fi
 
-# Set Bluetooth name and make discoverable/pairable
-echo "[INFO] Configuring Bluetooth device..."
+# Set Bluetooth name and make discoverable/pairable with headless pairing
+echo "[INFO] Configuring Bluetooth device for headless auto-pairing..."
 bluetoothctl << EOF
 power on
-system-alias $DEVICE_NAME
 agent NoInputNoOutput
-discoverable on
-pairable on
 default-agent
+pairable on
+discoverable on
+system-alias $DEVICE_NAME
 EOF
 
 echo "[INFO] Bluetooth device set to '$DEVICE_NAME'."
