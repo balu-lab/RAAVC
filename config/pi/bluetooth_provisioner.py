@@ -1,7 +1,10 @@
 import os
 import shutil
+import time
 from pathlib import Path
 from datetime import datetime
+
+DEVICE_NAME = "New RAAVC Device"
 
 CONFIG_DIR = Path("config")
 CONFIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -26,6 +29,12 @@ def wait_for_file(filename, timeout=60):
     return None
 
 def main():
+    # Set Bluetooth name and make discoverable
+    os.system(f"bluetoothctl system-alias '{DEVICE_NAME}'")
+    os.system("bluetoothctl power on")
+    os.system("bluetoothctl discoverable on")
+    os.system("bluetoothctl pairable on")
+
     log("RAAVC Bluetooth Provisioner ready.")
     log(f"Ensure Bluetooth is discoverable and waiting for file transfer to {INCOMING_DIR}.")
 
@@ -41,5 +50,4 @@ def main():
         log("WiFi credentials file moved to RAAVC config directory.")
 
 if __name__ == "__main__":
-    import time
     main()
