@@ -76,14 +76,27 @@ if ! command -v git &> /dev/null; then
     sudo apt-get install -y git
 fi
 
+# Check if Git repo is corrupted and reclone if necessary
+if [ -d "$REPO_PATH/.git" ]; then
+    cd "$REPO_PATH"
+    if ! git fsck --full > /dev/null 2>&1; then
+        echo "[BOOT] Git repo is corrupted. Deleting and recloning..."
+        cd ~
+        rm -rf "$REPO_PATH"
+        git clone "$REPO_URL" "$REPO_PATH"
+    else
+        echo "[BOOT] Git repo OK."
+    fi
+else
+    echo "[BOOT] Repo not found; cloning fresh..."
+    git clone "$REPO_URL" "$REPO_PATH"
+fi
+
 # Allow Git to trust this repo path (fixes "dubious ownership" warning)
 git config --global --add safe.directory "$REPO_PATH"
 
-# Clone or update the repo
-if [ ! -d "$REPO_PATH" ]; then
-    echo "[BOOT] RAAVC repo not found. Cloning..."
-    git clone "$REPO_URL" "$REPO_PATH"
-else
+# Update the repo if already present
+if [ -d "$REPO_PATH" ]; then
     echo "[BOOT] RAAVC repo found. Pulling updates..."
     cd "$REPO_PATH" || exit 1
     git reset --hard HEAD
