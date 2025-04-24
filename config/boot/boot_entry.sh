@@ -17,8 +17,32 @@ if [ -f "$CONFIG_PATH" ]; then
     PASS=$(jq -r '.wifi_pass // empty' "$CONFIG_PATH")
     if [ -n "$SSID" ] && [ -n "$PASS" ]; then
         echo "[BOOT] Found WiFi in config. Attempting to connect to $SSID..."
-        nmcli device wifi connect "$SSID" password "$PASS" || echo "[BOOT] nmcli connect failed."
-        # Do not run wait loop here, let nmcli handle failure.
+        ATTEMPT=1
+        CONNECTED=0
+        while [ $ATTEMPT -le 4 ]; do
+            nmcli device wifi connect "$SSID" password "$PASS"
+            # Give a second for DHCP to assign an IP
+            sleep 2
+            if [ -n "$(hostname -I)" ]; then
+                CONNECTED=1
+                break
+            else
+                echo "[BOOT] Attempt $ATTEMPT failed to connect to $SSID."
+            fi
+            ATTEMPT=$((ATTEMPT+1))
+        done
+        if [ $CONNECTED -eq 1 ]; then
+            # Extract and echo role from config if present
+            ROLE=$(jq -r '.role // empty' "$CONFIG_PATH")
+            if [ -n "$ROLE" ]; then
+                echo "simulated $ROLE script running now"
+            else
+                echo "No role specified in config."
+            fi
+        else
+            echo "[BOOT] All attempts failed. Will wait for any WiFi..."
+            WIFI_WAIT=1
+        fi
     else
         echo "[BOOT] Config present but no WiFi credentials. Waiting for any WiFi..."
         WIFI_WAIT=1
@@ -34,6 +58,15 @@ if [ $WIFI_WAIT -eq 1 ]; then
         sleep 1
     done
     echo "[BOOT] WiFi connected."
+    # If we want to still output the role if config present after default connect, do it here
+    if [ -f "$CONFIG_PATH" ]; then
+        ROLE=$(jq -r '.role // empty' "$CONFIG_PATH")
+        if [ -n "$ROLE" ]; then
+            echo "simulated $ROLE script running now"
+        else
+            echo "No role specified in config."
+        fi
+    fi
 fi
 
 # Ensure Git is installed
