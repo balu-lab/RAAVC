@@ -11,25 +11,30 @@ CONFIG_PATH="home/raavc/RAAVC-local/config/raavc_config.json"
 echo "[BOOT] Checking for WiFi configuration..."
 
 # Check for raavc_config.json and attempt WiFi connection
+WIFI_WAIT=0
 if [ -f "$CONFIG_PATH" ]; then
     SSID=$(jq -r '.wifi_ssid // empty' "$CONFIG_PATH")
     PASS=$(jq -r '.wifi_pass // empty' "$CONFIG_PATH")
     if [ -n "$SSID" ] && [ -n "$PASS" ]; then
         echo "[BOOT] Found WiFi in config. Attempting to connect to $SSID..."
-        nmcli device wifi connect "$SSID" password "$PASS" || echo "[BOOT] nmcli connect failed; will keep waiting for any WiFi."
+        nmcli device wifi connect "$SSID" password "$PASS" || echo "[BOOT] nmcli connect failed."
+        # Do not run wait loop here, let nmcli handle failure.
     else
         echo "[BOOT] Config present but no WiFi credentials. Waiting for any WiFi..."
+        WIFI_WAIT=1
     fi
 else
     echo "[BOOT] No config file; waiting for any WiFi connection (e.g., default hotspot)."
+    WIFI_WAIT=1
 fi
 
-# Wait for wlan0 to get an IP (any WiFi connection)
-echo "[BOOT] Waiting for WiFi connection..."
-while [ -z "$(hostname -I)" ]; do
-    sleep 1
-done
-echo "[BOOT] WiFi connected."
+if [ $WIFI_WAIT -eq 1 ]; then
+    echo "[BOOT] Waiting for WiFi connection..."
+    while [ -z "$(hostname -I)" ]; do
+        sleep 1
+    done
+    echo "[BOOT] WiFi connected."
+fi
 
 # Ensure Git is installed
 if ! command -v git &> /dev/null; then
