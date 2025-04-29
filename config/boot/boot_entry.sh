@@ -52,6 +52,7 @@ else
     WIFI_WAIT=1
 fi
 
+# Connect to default WiFi hotspot of no other successful connections
 if [ $WIFI_WAIT -eq 1 ]; then
     echo "[BOOT] Waiting for WiFi connection..."
     while [ -z "$(hostname -I)" ]; do
