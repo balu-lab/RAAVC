@@ -61,7 +61,7 @@ if [ $WIFI_WAIT -eq 1 ]; then
     echo "[BOOT] WiFi connected."
     # If we want to still output the role if config present after default connect, do it here
     if [ -f "$CONFIG_PATH" ]; then
-        ROLE=$(jq -r '.role // empty' "$CONFIG_PATH")
+        ROLE=$(jq -r '.devie_role // empty' "$CONFIG_PATH")
         if [ -n "$ROLE" ]; then
             echo "simulated $ROLE script running now"
         else

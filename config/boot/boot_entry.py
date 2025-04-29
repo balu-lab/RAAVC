@@ -20,12 +20,14 @@ def get_ip():
 
 def configure_bluetooth():
     try:
-        # Full Bluetooth configuration to be discoverable and pairable
-        subprocess.run(['bluetoothctl', 'power', 'on'], check=True)
-        subprocess.run(['bluetoothctl', 'discoverable', 'on'], check=True)
-        subprocess.run(['bluetoothctl', 'pairable', 'on'], check=True)
-        subprocess.run(['bluetoothctl', 'agent', 'NoInputNoOutput'], check=True)
-        subprocess.run(['bluetoothctl', 'default-agent'], check=True)
+        bt_commands = (
+            "power on\n"
+            "agent NoInputNoOutput\n"
+            "default-agent\n"
+            "pairable on\n"
+            "discoverable on\n"
+        )
+        subprocess.run(['bluetoothctl'], input=bt_commands.encode(), check=True)
     except subprocess.CalledProcessError as e:
         print(f"Bluetooth setup error: {e}")
 
