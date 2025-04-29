@@ -43,7 +43,7 @@ def main():
     while not os.path.exists(CONFIG_PATH):
         ip = get_ip()
         if ip and ip != last_ip:
-            set_bluetooth_alias(f"IP-{ip}")
+            set_bluetooth_alias(f"RAAVC-{ip}")
             print("[PYTHON] Check BT devices for IP address now.")
             last_ip = ip
         time.sleep(30)  # Wait and recheck
