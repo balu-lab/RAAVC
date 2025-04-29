@@ -6,7 +6,7 @@ export HOME="/home/raavc"
 REPO_PATH="/home/raavc/RAAVC"
 BOOT_SCRIPT="$REPO_PATH/config/boot/boot_entry.py"
 REPO_URL="https://github.com/balu-lab/RAAVC.git"
-CONFIG_PATH="home/raavc/RAAVC-local/config/raavc_config.json"
+CONFIG_PATH="/home/raavc/RAAVC-local/config/raavc_config.json"
 
 echo "[BOOT] Checking for WiFi configuration..."
 
@@ -33,7 +33,7 @@ if [ -f "$CONFIG_PATH" ]; then
         done
         if [ $CONNECTED -eq 1 ]; then
             # Extract and echo role from config if present
-            ROLE=$(jq -r '.role // empty' "$CONFIG_PATH")
+            ROLE=$(jq -r '.device_role // empty' "$CONFIG_PATH")
             if [ -n "$ROLE" ]; then
                 echo "simulated $ROLE script running now"
             else
