@@ -10,11 +10,16 @@ CONFIG_PATH="/home/raavc/RAAVC-local/config/raavc_config.json"
 
 echo "[BOOT] Checking for WiFi configuration..."
 
+# Shell function to parse JSON with Python
+get_json_value() {
+    python3 -c "import json; print(json.load(open('$1')).get('$2', ''))"
+}
+
 # Check for raavc_config.json and attempt WiFi connection
 WIFI_WAIT=0
 if [ -f "$CONFIG_PATH" ]; then
-    SSID=$(jq -r '.wifi_ssid // empty' "$CONFIG_PATH")
-    PASS=$(jq -r '.wifi_pass // empty' "$CONFIG_PATH")
+    SSID=$(get_json_value "$CONFIG_PATH" "wifi_ssid")
+    PASS=$(get_json_value "$CONFIG_PATH" "wifi_pass")
     if [ -n "$SSID" ] && [ -n "$PASS" ]; then
         echo "[BOOT] Found WiFi in config. Attempting to connect to $SSID..."
         ATTEMPT=1
@@ -33,7 +38,7 @@ if [ -f "$CONFIG_PATH" ]; then
         done
         if [ $CONNECTED -eq 1 ]; then
             # Extract and echo role from config if present
-            ROLE=$(jq -r '.device_role // empty' "$CONFIG_PATH")
+            ROLE=$(get_json_value "$CONFIG_PATH" "device_role")
             if [ -n "$ROLE" ]; then
                 echo "simulated $ROLE script running now"
             else
@@ -61,7 +66,7 @@ if [ $WIFI_WAIT -eq 1 ]; then
     echo "[BOOT] WiFi connected."
     # If we want to still output the role if config present after default connect, do it here
     if [ -f "$CONFIG_PATH" ]; then
-        ROLE=$(jq -r '.devie_role // empty' "$CONFIG_PATH")
+        ROLE=$(get_json_value "$CONFIG_PATH" "device_role")
         if [ -n "$ROLE" ]; then
             echo "simulated $ROLE script running now"
         else
