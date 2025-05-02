@@ -28,7 +28,10 @@ def write_config_file(path, config_data):
 def main():
     if os.path.exists(CONFIG_PATH):
         print(f"Config already exists at {CONFIG_PATH}")
-        return
+        overwrite = input("Would you like to overwrite it? (y/N): ").strip().lower()
+        if overwrite not in ["y", "yes"]:
+            print("Keeping existing configuration.")
+            return
 
     ensure_directories_exist(CONFIG_PATH)
     config_data = prompt_user_info()
